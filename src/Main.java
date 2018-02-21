@@ -1,4 +1,6 @@
 import connection.DBConnection;
+import model.Message;
+import model.Rele;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -24,7 +26,7 @@ public class Main {
 
         try {
             //inicio del servidor en el puerto X
-            socket = new DatagramSocket(5000);
+            socket = new DatagramSocket(80);
 
             System.out.println("Servidor escuchando");
 
@@ -33,13 +35,14 @@ public class Main {
         }
 
 
+        new CheckWemosStatus().start();
 
     while (servidorOk){
 
         try {
             // instancia el paquete
             receivePacket  = new DatagramPacket(new byte[1024],1024);
-            //Aqui el servidor se queda a la escucha y se recibe algo lo mete en el paquete que le indiquemos
+            //Aqui el servidor se queda a la escucha y si recibe algo lo mete en el paquete que le indiquemos
             socket.receive(receivePacket);
             String mensaje = new String( receivePacket.getData());
             System.out.println("Ha llegado una peticion \n");
@@ -47,12 +50,12 @@ public class Main {
             System.out.println("El mensaje contiene: " + mensaje);
             System.out.println("Sirviendo la petición");
 
+            //Aqui iria la mac que envia el wemos
+            Message msg =  getWemosStatus("1C:1B:0D:61:1C:AE");
 
-            checkWemosStatus("");
 
-            String msg="Respondo";
 
-           replyPacket = new DatagramPacket(msg.getBytes(),msg.getBytes().length,receivePacket.getAddress(),receivePacket.getPort());
+           replyPacket = new DatagramPacket(msg.toString().getBytes(),msg.toString().getBytes().length,receivePacket.getAddress(),receivePacket.getPort());
            socket.send(replyPacket);
 
 
@@ -73,8 +76,8 @@ public class Main {
 
     }
 
-    private static void checkWemosStatus(String mac) {
-
+    private static Message getWemosStatus(String mac) {
+        Message message=new Message(mac);
         try {
             Connection connection =new DBConnection().getConexion();
             String query = "select * from rele where macWemos=?";
@@ -82,7 +85,16 @@ public class Main {
             preparedStatement.setString( 1 ,mac);
            ResultSet result = preparedStatement.executeQuery();
 
+            Rele rele;
            while (result.next()){
+               rele=new Rele();
+               rele.setId(result.getInt(0));
+               rele.setName(result.getString(1));
+               rele.setDescription(result.getString(2));
+               rele.setState(result.getByte(3));
+               rele.setMacWemos(result.getString(4));
+
+               message.getReles().add(rele);
 
            }
 
@@ -91,6 +103,6 @@ public class Main {
         }
 
 
-
+    return message;
     }
 }
