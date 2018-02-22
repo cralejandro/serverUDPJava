@@ -26,7 +26,7 @@ public class Main {
 
         try {
             //inicio del servidor en el puerto X
-            socket = new DatagramSocket(80);
+            socket = new DatagramSocket(5000);
 
             System.out.println("Servidor escuchando");
 
@@ -49,11 +49,12 @@ public class Main {
             System.out.println("Procedente de :" +receivePacket.getAddress());
             System.out.println("El mensaje contiene: " + mensaje);
             System.out.println("Sirviendo la petición");
+            updateLastMessageandState("1C:1B:0D:61:1C:AE");
 
             //Aqui iria la mac que envia el wemos
             Message msg =  getWemosStatus("1C:1B:0D:61:1C:AE");
 
-
+            System.out.println(msg);
 
            replyPacket = new DatagramPacket(msg.toString().getBytes(),msg.toString().getBytes().length,receivePacket.getAddress(),receivePacket.getPort());
            socket.send(replyPacket);
@@ -76,23 +77,46 @@ public class Main {
 
     }
 
+    private static void updateLastMessageandState(String mac) {
+        try {
+            Connection connection =new DBConnection().getConexion();
+            String query = "update wemos set lastMessage=(select now()) where mac = ?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString( 1 ,mac);
+            preparedStatement.executeUpdate();
+            query= "update wemos set state=1 where mac = ? and state=0";
+             preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString( 1 ,mac);
+            preparedStatement.executeUpdate();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     private static Message getWemosStatus(String mac) {
         Message message=new Message(mac);
+
+
+
         try {
             Connection connection =new DBConnection().getConexion();
             String query = "select * from rele where macWemos=?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString( 1 ,mac);
-           ResultSet result = preparedStatement.executeQuery();
+            ResultSet result = preparedStatement.executeQuery();
 
             Rele rele;
            while (result.next()){
                rele=new Rele();
-               rele.setId(result.getInt(0));
-               rele.setName(result.getString(1));
-               rele.setDescription(result.getString(2));
-               rele.setState(result.getByte(3));
-               rele.setMacWemos(result.getString(4));
+               rele.setId(result.getInt(1));
+               rele.setName(result.getString(2));
+               rele.setDescription(result.getString(3));
+               rele.setState(result.getByte(4));
+               rele.setMacWemos(result.getString(5));
 
                message.getReles().add(rele);
 
