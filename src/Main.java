@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Main {
@@ -26,7 +28,7 @@ public class Main {
 
         try {
             //inicio del servidor en el puerto X
-            socket = new DatagramSocket(5000);
+            socket = new DatagramSocket(80);
 
             System.out.println("Servidor escuchando");
 
@@ -41,22 +43,26 @@ public class Main {
 
         try {
             // instancia el paquete
-            receivePacket  = new DatagramPacket(new byte[1024],1024);
+            receivePacket  = new DatagramPacket(new byte[17],17);
             //Aqui el servidor se queda a la escucha y si recibe algo lo mete en el paquete que le indiquemos
             socket.receive(receivePacket);
+
+
+
             String mensaje = new String( receivePacket.getData());
+
             System.out.println("Ha llegado una peticion \n");
             System.out.println("Procedente de :" +receivePacket.getAddress());
             System.out.println("El mensaje contiene: " + mensaje);
             System.out.println("Sirviendo la petición");
-            updateLastMessageandState("1C:1B:0D:61:1C:AE");
+            updateLastMessageandState(mensaje);
 
             //Aqui iria la mac que envia el wemos
-            Message msg =  getWemosStatus("1C:1B:0D:61:1C:AE");
+            Message msg =  getWemosStatus(mensaje);
 
-            System.out.println(msg);
 
-           replyPacket = new DatagramPacket(msg.toString().getBytes(),msg.toString().getBytes().length,receivePacket.getAddress(),receivePacket.getPort());
+
+          replyPacket = new DatagramPacket(msg.toString().getBytes(),msg.toString().getBytes().length,receivePacket.getAddress(),receivePacket.getPort());
            socket.send(replyPacket);
 
 

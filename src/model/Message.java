@@ -35,6 +35,15 @@ public class Message {
 
     @Override
     public String toString() {
-        return mac+";"+getReles().get(0).getState()+";"+getReles().get(1).getState();
+        StringBuilder sb= new StringBuilder(mac);
+
+        for (Rele rele:reles) {
+            sb.append(";");
+            sb.append(rele.getState());
+
+        }
+
+
+        return sb.toString();
     }
 }
