@@ -28,7 +28,7 @@ public class Main {
 
         try {
             //inicio del servidor en el puerto X
-            socket = new DatagramSocket(80);
+            socket = new DatagramSocket(8888);
 
             System.out.println("Servidor escuchando");
 
