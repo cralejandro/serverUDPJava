@@ -46,28 +46,30 @@ public class Main {
             receivePacket  = new DatagramPacket(new byte[17],17);
             //Aqui el servidor se queda a la escucha y si recibe algo lo mete en el paquete que le indiquemos
             socket.receive(receivePacket);
-
-
-
-            String mensaje = new String( receivePacket.getData());
-
-            System.out.println("Ha llegado una peticion \n");
-            System.out.println("Procedente de :" +receivePacket.getAddress());
-            System.out.println("El mensaje contiene: " + mensaje);
-            System.out.println("Sirviendo la petición");
-            updateLastMessageandState(mensaje);
-
-            //Aqui iria la mac que envia el wemos
-            Message msg =  getWemosStatus(mensaje);
-
-
-
-          replyPacket = new DatagramPacket(msg.toString().getBytes(),msg.toString().getBytes().length,receivePacket.getAddress(),receivePacket.getPort());
-           socket.send(replyPacket);
+            String mensaje = new String(receivePacket.getData());
+            if (isValidated(mensaje)) {
 
 
 
 
+                System.out.println("Ha llegado una peticion \n");
+                System.out.println("Procedente de :" + receivePacket.getAddress());
+                System.out.println("El mensaje contiene: " + mensaje);
+                System.out.println("Sirviendo la petición");
+                updateLastMessageandState(mensaje);
+
+                //Aqui iria la mac que envia el wemos
+                Message msg = getWemosStatus(mensaje);
+
+
+                System.out.println(msg.toString());
+                replyPacket = new DatagramPacket(msg.toString().getBytes(), msg.toString().getBytes().length, receivePacket.getAddress(), receivePacket.getPort());
+                socket.send(replyPacket);
+
+
+            }else{
+                System.err.println("WEMOS NO REGISTRADO O MAC INVALIDA");
+            }
 
         } catch (IOException e) {
             System.out.println("Error IO");
@@ -83,10 +85,29 @@ public class Main {
 
     }
 
+    private static boolean isValidated(String mac) {
+
+        try {
+            Connection connection =DBConnection.conexion;
+            String query="select validado from wemos where mac=?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString( 1 ,mac);
+            ResultSet result = preparedStatement.executeQuery();
+            result.next();
+            return result.getByte(1)==1;
+
+
+        } catch (SQLException e) {
+            System.err.println("WEMOS NO REGISTRADO O MAC INVALIDA");
+        }
+
+        return false;
+    }
+
     private static void updateLastMessageandState(String mac) {
         try {
-            Connection connection =new DBConnection().getConexion();
-            String query = "update wemos set lastMessage=(select now()) where mac = ?;";
+            Connection connection =DBConnection.conexion;
+            String query = "update wemos set lastMessage=(select now()) where mac = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString( 1 ,mac);
             preparedStatement.executeUpdate();
@@ -97,7 +118,7 @@ public class Main {
 
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("WEMOS NO REGISTRADO O MAC INVALIDA");
         }
 
 
@@ -109,7 +130,7 @@ public class Main {
 
 
         try {
-            Connection connection =new DBConnection().getConexion();
+            Connection connection =DBConnection.conexion;
             String query = "select * from rele where macWemos=?";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString( 1 ,mac);
@@ -129,7 +150,7 @@ public class Main {
            }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("WEMOS NO REGISTRADO O MAC INVALIDA");
         }
 
 

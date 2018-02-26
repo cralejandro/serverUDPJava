@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class DBConnection {
 	
 		private static final String URL="jdbc:mysql://althreeus.com:3343/wemos";
-		private Connection conexion=null;
+		public static Connection conexion = new DBConnection().getConexion();
 		
 	public DBConnection() {
 			

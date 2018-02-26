@@ -12,7 +12,7 @@ public class CheckWemosStatus extends Thread {
     //TO DO
 
     public CheckWemosStatus() {
-    connection=new DBConnection().getConexion();
+    connection=DBConnection.conexion;
     }
 
     @Override
