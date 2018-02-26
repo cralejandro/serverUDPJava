@@ -40,7 +40,7 @@ public class Message {
         for (int i=0;i<reles.size();i++) {
             sb.append(i);
             sb.append(":");
-            sb.append(reles.get(0).getState());
+            sb.append(reles.get(i).getState());
             if(i!=reles.size()-1){
                 sb.append(",");
             }

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBConnection {
 	
-		private static final String URL="jdbc:mysql://althreeus.com:3343/wemos";
+		private static final String URL="insert bbdd address here";
 		public static Connection conexion = new DBConnection().getConexion();
 		
 	public DBConnection() {
