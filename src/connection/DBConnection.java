@@ -13,7 +13,7 @@ public class DBConnection {
 			
 			try {
 				Class.forName("com.mysql.jdbc.Driver");
-				conexion = DriverManager.getConnection(URL,"usuario","s2dam18");
+				conexion = DriverManager.getConnection(URL,"user","pass");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
