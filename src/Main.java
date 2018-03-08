@@ -78,8 +78,12 @@ public class Main {
 
     }
 
-    socket.close();
-
+    try {
+            socket.close();
+            DBConnection.conexion.close();
+        } catch (Exception e) {
+            System.out.println("Fallo al cerrar conexion con la base de datos o el socket");
+        }
 
 
 
